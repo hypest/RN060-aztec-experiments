@@ -4,7 +4,6 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Rect;
-import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
@@ -12,6 +11,8 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.inputmethod.InputMethodManager;
+
+import androidx.annotation.Nullable;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.ReactContext;

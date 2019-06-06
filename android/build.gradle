@@ -3,7 +3,7 @@
 buildscript {
     ext {
         buildToolsVersion = "28.0.3"
-        minSdkVersion = 16
+        minSdkVersion = 21
         compileSdkVersion = 28
         targetSdkVersion = 28
         supportLibVersion = "28.0.0"
@@ -19,6 +19,9 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
+
+// Load the "build from source" flag value but default to `true` since this is the demo gutenberg-mobile project so
+project.ext.buildGutenbergFromSource = project.properties.getOrDefault('wp.BUILD_GUTENBERG_FROM_SOURCE', true).toBoolean()
 
 allprojects {
     repositories {

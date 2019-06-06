@@ -4,7 +4,6 @@ package org.wordpress.mobile.ReactNativeAztec;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
-import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.TextUtils;
@@ -12,6 +11,8 @@ import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+
+import androidx.annotation.Nullable;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;

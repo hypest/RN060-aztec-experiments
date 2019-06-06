@@ -163,7 +163,15 @@ android {
     }
 }
 
+repositories {
+    google()
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+
 dependencies {
+    implementation project(':react-native-aztec')
+
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
