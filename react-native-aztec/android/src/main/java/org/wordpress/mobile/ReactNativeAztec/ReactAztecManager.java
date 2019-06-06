@@ -99,11 +99,6 @@ public class ReactAztecManager extends BaseViewManager<ReactAztecText, LayoutSha
     }
 
     @Override
-    public Class<? extends LayoutShadowNode> getShadowNodeClass() {
-        return ReactTextInputShadowNode.class;
-    }
-
-    @Override
     protected ReactAztecText createViewInstance(ThemedReactContext reactContext) {
         ReactAztecText aztecText = new ReactAztecText(reactContext);
         aztecText.setFocusableInTouchMode(true);
@@ -114,7 +109,12 @@ public class ReactAztecManager extends BaseViewManager<ReactAztecText, LayoutSha
 
     @Override
     public LayoutShadowNode createShadowNodeInstance() {
-        return new ReactTextInputShadowNode();
+        return new ReactAztecTextShadowNode();
+    }
+
+    @Override
+    public Class<? extends LayoutShadowNode> getShadowNodeClass() {
+        return ReactAztecTextShadowNode.class;
     }
 
     @Nullable
