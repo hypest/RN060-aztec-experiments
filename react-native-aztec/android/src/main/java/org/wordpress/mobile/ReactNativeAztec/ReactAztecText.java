@@ -4,9 +4,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -19,6 +21,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
+import com.facebook.react.views.text.ReactTextUpdate;
 import com.facebook.react.views.textinput.ContentSizeWatcher;
 import com.facebook.react.views.textinput.ReactTextInputLocalData;
 import com.facebook.react.views.textinput.ScrollWatcher;
@@ -55,6 +58,7 @@ public class ReactAztecText extends AztecText {
     // FIXME: Used in `incrementAndGetEventCounter` but never read. I guess we can get rid of it, but before this
     // check when it's used in EditText in RN. (maybe tests?)
     int mNativeEventCount = 0;
+    private int mMostRecentEventCount = 0;
 
     String lastSentFormattingOptionsEventString = "";
     boolean shouldHandleOnEnter = false;
@@ -138,6 +142,45 @@ public class ReactAztecText extends AztecText {
         setMovementMethod(new ReactAztecArrowKeyMovementMethod());
     }
 
+    // VisibleForTesting from {@link TextInputEventsTestCase}.
+    public void maybeSetText(ReactTextUpdate reactTextUpdate) {
+        if( isSecureText() &&
+                TextUtils.equals(getText(), reactTextUpdate.getText())) {
+            return;
+        }
+
+        // Only set the text if it is up to date.
+        mMostRecentEventCount = reactTextUpdate.getJsEventCounter();
+        if (mMostRecentEventCount < mNativeEventCount) {
+            return;
+        }
+
+        // The current text gets replaced with the text received from JS. However, the spans on the
+        // current text need to be adapted to the new text. Since TextView#setText() will remove or
+        // reset some of these spans even if they are set directly, SpannableStringBuilder#replace() is
+        // used instead (this is also used by the the keyboard implementation underneath the covers).
+        SpannableStringBuilder spannableStringBuilder =
+                new SpannableStringBuilder(reactTextUpdate.getText());
+//        manageSpans(spannableStringBuilder);
+//        mContainsImages = reactTextUpdate.containsImages();
+        mIsSettingTextFromJS = true;
+
+        // On some devices, when the text is cleared, buggy keyboards will not clear the composing
+        // text so, we have to set text to null, which will clear the currently composing text.
+        if (reactTextUpdate.getText().length() == 0) {
+            setText(null);
+        } else {
+            getText().replace(0, length(), spannableStringBuilder);
+        }
+
+        mIsSettingTextFromJS = false;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (getBreakStrategy() != reactTextUpdate.getTextBreakStrategy()) {
+                setBreakStrategy(reactTextUpdate.getTextBreakStrategy());
+            }
+        }
+    }
+
     @Override
     public void refreshText() {
         super.refreshText();
@@ -209,8 +252,22 @@ public class ReactAztecText extends AztecText {
         mInputMethodManager.hideSoftInputFromWindow(getWindowToken(), 0);
     }
 
+    public void setMostRecentEventCount(int mostRecentEventCount) {
+        mMostRecentEventCount = mostRecentEventCount;
+    }
+
     public void setScrollWatcher(ScrollWatcher scrollWatcher) {
         mScrollWatcher = scrollWatcher;
+    }
+
+    @Override
+    public void setSelection(int start, int end) {
+        // Skip setting the selection if the text wasn't set because of an out of date value.
+        if (mMostRecentEventCount < mNativeEventCount) {
+            return;
+        }
+
+        super.setSelection(start, end);
     }
 
     @Override
@@ -224,6 +281,14 @@ public class ReactAztecText extends AztecText {
 
     public void setContentSizeWatcher(ContentSizeWatcher contentSizeWatcher) {
         mContentSizeWatcher = contentSizeWatcher;
+    }
+
+    private boolean isSecureText() {
+        return
+                (getInputType() &
+                        (InputType.TYPE_NUMBER_VARIATION_PASSWORD |
+                                InputType.TYPE_TEXT_VARIATION_PASSWORD))
+                        != 0;
     }
 
     private void onContentSizeChange() {

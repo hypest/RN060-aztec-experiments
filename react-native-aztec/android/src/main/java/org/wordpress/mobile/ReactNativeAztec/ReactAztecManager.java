@@ -6,6 +6,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Editable;
 import android.text.Layout;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.TypedValue;
@@ -20,6 +21,8 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
+import com.facebook.react.uimanager.BaseViewManager;
+import com.facebook.react.uimanager.LayoutShadowNode;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -32,10 +35,14 @@ import com.facebook.react.views.scroll.ScrollEvent;
 import com.facebook.react.views.scroll.ScrollEventType;
 import com.facebook.react.views.text.DefaultStyleValuesUtil;
 import com.facebook.react.views.text.ReactFontManager;
+import com.facebook.react.views.text.ReactTextUpdate;
+import com.facebook.react.views.text.TextInlineImageSpan;
 import com.facebook.react.views.textinput.ReactContentSizeChangedEvent;
+import com.facebook.react.views.textinput.ReactEditText;
 import com.facebook.react.views.textinput.ReactTextChangedEvent;
 import com.facebook.react.views.textinput.ReactTextInputEvent;
 import com.facebook.react.views.textinput.ReactTextInputManager;
+import com.facebook.react.views.textinput.ReactTextInputShadowNode;
 import com.facebook.react.views.textinput.ScrollWatcher;
 
 import org.wordpress.aztec.glideloader.GlideImageLoader;
@@ -52,7 +59,9 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ReactAztecManager extends SimpleViewManager<ReactAztecText> {
+import javax.annotation.Nonnull;
+
+public class ReactAztecManager extends BaseViewManager<ReactAztecText, LayoutShadowNode> {
 
     public static final String REACT_CLASS = "RCTAztecView";
 
@@ -90,12 +99,22 @@ public class ReactAztecManager extends SimpleViewManager<ReactAztecText> {
     }
 
     @Override
+    public Class<? extends LayoutShadowNode> getShadowNodeClass() {
+        return ReactTextInputShadowNode.class;
+    }
+
+    @Override
     protected ReactAztecText createViewInstance(ThemedReactContext reactContext) {
         ReactAztecText aztecText = new ReactAztecText(reactContext);
         aztecText.setFocusableInTouchMode(true);
         aztecText.setFocusable(true);
         aztecText.setCalypsoMode(false);
         return aztecText;
+    }
+
+    @Override
+    public LayoutShadowNode createShadowNodeInstance() {
+        return new ReactTextInputShadowNode();
     }
 
     @Nullable
@@ -506,6 +525,27 @@ public class ReactAztecManager extends SimpleViewManager<ReactAztecText> {
         
         // Don't think we need to add setOnEditorActionListener here (intercept Enter for example), but
         // in case check ReactTextInputManager
+    }
+
+    @Override
+    public void updateExtraData(ReactAztecText view, Object extraData) {
+        if (extraData instanceof ReactTextUpdate) {
+            ReactTextUpdate update = (ReactTextUpdate) extraData;
+
+            view.setPadding(
+                    (int) update.getPaddingLeft(),
+                    (int) update.getPaddingTop(),
+                    (int) update.getPaddingRight(),
+                    (int) update.getPaddingBottom());
+
+            if (update.containsImages()) {
+                Spannable spannable = update.getText();
+                TextInlineImageSpan.possiblyUpdateInlineImageSpans(spannable, view);
+            }
+            view.maybeSetText(update);
+            if (update.getSelectionStart() != UNSET && update.getSelectionEnd() != UNSET)
+                view.setSelection(update.getSelectionStart(), update.getSelectionEnd());
+        }
     }
 
     private class AztecTextWatcher implements TextWatcher {
