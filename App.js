@@ -28,7 +28,12 @@ import {
 import RCTAztecView from "react-native-aztec";
 
 const App = () => {
-  const html = "qweqwsdfdf";
+  this.props = {
+    placeholder: "boo",
+  };
+  const isSelected = true;
+  const tagName = 'p';
+  const html = "qweqwsdfdf sidfuhv osidufhv osidufhv osidufhv osidufhv osidufhv osdifuvh oweiurh oviudvh oieurh oieurh oiuhv oiuaerh voisufdhv oiuerh oivuerhv oiurehv oisdfuhv asd iasdf piasudhf iaudshf oiausdhf oiaweuhfo isaudh ofiuawhf ";
   const selection = null;
 
   return (
@@ -41,6 +46,7 @@ const App = () => {
         >
           <Header />
           <TextInput
+            text={"wwwwwww"}
             multiline
             placeholder="Above TextInput"
             style={{
@@ -54,37 +60,42 @@ const App = () => {
             }}
           />
           <RCTAztecView
-            ref={ref => {
+            ref={ ( ref ) => {
               this._editor = ref;
 
-              // if (this.props.setRef) {
-              //   this.props.setRef(ref);
-              // }
-            }}
-            // style={{
-            //   // minHeight: Math.max(minHeight, this.state.height)
-            // }}
-            text={{ text: html, eventCount: this.lastEventCount, selection }}
-            placeholder={"boo"}
-            // onContentSizeChange={this.onContentSizeChange}
-            blockType={{ tag: "p" }}
-            color={"black"}
-            maxImagesWidth={200}
-            // disableEditingMenu={this.props.disableEditingMenu}
-            isMultiline={this.isMultiline}
-          />
-          <TextInput
-            multiline
-            placeholder="Below TextInput"
-            style={{
-              maxHeight: 100, // <- set the max height here
-
-              // just some styling to make the input visible
-              borderColor: "#1ca0ff",
-              borderWidth: 1,
-              padding: 10,
-              width: "75%"
-            }}
+              if ( this.props.setRef ) {
+                this.props.setRef( ref );
+              }
+            } }
+            // style={ {
+            //   ...style,
+            //   minHeight: Math.max( minHeight, this.state.height ),
+            // } }
+            text={ { text: html, eventCount: this.lastEventCount, selection } }
+            placeholder={ this.props.placeholder }
+            // placeholderTextColor={ this.props.placeholderTextColor || styles[ 'block-editor-rich-text' ].textDecorationColor }
+            deleteEnter={ this.props.deleteEnter }
+            onChange={ this.onChange }
+            onFocus={ this.onFocus }
+            onBlur={ this.onBlur }
+            onEnter={ this.onEnter }
+            onBackspace={ this.onBackspace }
+            onPaste={ this.onPaste }
+            // activeFormats={ this.getActiveFormatNames( record ) }
+            onContentSizeChange={ this.onContentSizeChange }
+            onCaretVerticalPositionChange={ this.props.onCaretVerticalPositionChange }
+            onSelectionChange={ this.onSelectionChangeFromAztec }
+            isSelected={ isSelected }
+            blockType={ { tag: tagName } }
+            color={ 'black' }
+            maxImagesWidth={ 200 }
+            fontFamily={ this.props.fontFamily }
+            fontSize={ this.props.fontSize }
+            fontWeight={ this.props.fontWeight }
+            fontStyle={ this.props.fontStyle }
+            disableEditingMenu={ this.props.disableEditingMenu }
+            isMultiline={ this.isMultiline }
+            textAlign={ this.props.textAlign }
           />
           <View style={styles.body}>
             <View style={styles.sectionContainer}>

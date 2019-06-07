@@ -4,3 +4,12 @@ include ':app'
 
 include ':react-native-aztec'
 project(':react-native-aztec').projectDir = new File(rootProject.projectDir, '../react-native-aztec/android')
+
+include ':aztecdemo', ':aztec', ':glide-loader', ':wordpress-comments', ':wordpress-shortcodes', ':picasso-loader'
+project(':aztecdemo').projectDir = new File(rootProject.projectDir, '../../../../../android/WordPress-Aztec-Android/app')
+project(':aztec').projectDir = new File(rootProject.projectDir,     '../../../../../android/WordPress-Aztec-Android/aztec')
+project(':glide-loader').projectDir = new File(rootProject.projectDir, '../../../../../android/WordPress-Aztec-Android/glide-loader')
+project(':wordpress-comments').projectDir = new File(rootProject.projectDir, '../../../../../android/WordPress-Aztec-Android/wordpress-comments')
+project(':wordpress-shortcodes').projectDir = new File(rootProject.projectDir, '../../../../../android/WordPress-Aztec-Android/wordpress-shortcodes')
+
+project(':picasso-loader').projectDir = new File(rootProject.projectDir, '../../../../../android/WordPress-Aztec-Android/picasso-loader')
